@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Main Dashboard -->
+    <div id="dashboard-screen" class="dashboard-container">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <div class="header-content">
+          <h1 class="logo">
+
+            TaskFlow
+          </h1>
+          <div class="header-actions">
+            <span class="user-name" id="user-name">Usuario</span>
+            <button class="btn btn-secondary" onclick="handleLogout()">
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <div class="content-wrapper">
+          <!-- Projects Section -->
+          <section class="projects-section" id="projects-section">
+            <div class="section-header">
+              <h2>Mis Proyectos</h2>
+              <button
+                class="btn btn-primary"
+                onclick="showCreateProjectModal()"
+              >
+                <span class="btn-icon">+</span>
+                Nuevo Proyecto
+              </button>
+            </div>
+            <div id="projects-grid" class="projects-grid">
+              <!-- Projects will be loaded here -->
+            </div>
+          </section>
+
+          <!-- Tasks Section -->
+          <section
+            class="tasks-section"
+            id="tasks-section"
+            style="display: none"
+          >
+            <div class="section-header">
+              <button class="btn btn-secondary" onclick="backToProjects()">
+                ← Volver a Proyectos
+              </button>
+              <h2 id="project-title">Tareas del Proyecto</h2>
+              <button class="btn btn-primary" onclick="showCreateTaskModal()">
+                <span class="btn-icon">+</span>
+                Nueva Tarea
+              </button>
+            </div>
+            <div id="tasks-list" class="tasks-list">
+              <!-- Tasks will be loaded here -->
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div id="project-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Nuevo Proyecto</h3>
+          <button class="modal-close" onclick="closeProjectModal()">
+            &times;
+          </button>
+        </div>
+        <form onsubmit="handleCreateProject(event)">
+          <div class="form-group">
+            <label for="project-name">Nombre del Proyecto</label>
+            <input
+              type="text"
+              id="project-name"
+              required
+              placeholder="Ej: Desarrollo Web"
+            />
+          </div>
+          <div class="form-group">
+            <label for="project-description">Descripción</label>
+            <textarea
+              id="project-description"
+              rows="4"
+              placeholder="Describe tu proyecto..."
+            ></textarea>
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeProjectModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Crear Proyecto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div id="task-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Nueva Tarea</h3>
+          <button class="modal-close" onclick="closeTaskModal()">
+            &times;
+          </button>
+        </div>
+        <form onsubmit="handleCreateTask(event)">
+          <div class="form-group">
+            <label for="task-title">Título de la Tarea</label>
+            <input
+              type="text"
+              id="task-title"
+              required
+              placeholder="Ej: Diseñar interfaz"
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-description">Descripción</label>
+            <textarea
+              id="task-description"
+              rows="4"
+              placeholder="Describe la tarea..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="task-date">Fecha de Vencimiento</label>
+            <input type="date" id="task-date" />
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeTaskModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">Crear Tarea</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
