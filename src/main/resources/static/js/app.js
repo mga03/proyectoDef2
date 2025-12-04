@@ -8,46 +8,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isAuthPage = document.getElementById('auth-screen');
     const isDashboardPage = document.getElementById('dashboard-screen');
 
-    if (api.isAuthenticated()) {
-        if (isAuthPage) {
+    // Check if we are on the login page (index.html or root)
+    if (isAuthPage) {
+        if (api.isAuthenticated()) {
             window.location.href = '/dashboard';
-        } else if (isDashboardPage) {
-            const username = api.getUser();
-            if (username) {
-                const userNameElement = document.getElementById('user-name');
-                if (userNameElement) userNameElement.textContent = username;
-            }
-            
-            // Load projects first
-            await loadProjects();
+        }
+        return;
+    }
 
-            // Handle initial URL state
-            const path = window.location.pathname;
-            
-            // 1. Create Project: /dashboard/proyectos
-            if (path === '/dashboard/proyectos') {
-                showCreateProjectModal(false);
-            }
-            
-            // 2. View Project: /dashboard/proyectos/{id}
-            const projectMatch = path.match(/^\/dashboard\/proyectos\/(\d+)$/);
-            if (projectMatch) {
-                const projectId = projectMatch[1];
-                await openProject(projectId, false);
-            }
-            
-            // 3. Create Task: /dashboard/proyectos/{id}/tareas/nueva
-            const taskMatch = path.match(/^\/dashboard\/proyectos\/(\d+)\/tareas\/nueva$/);
-            if (taskMatch) {
-                const projectId = taskMatch[1];
-                await openProject(projectId, false);
-                showCreateTaskModal(false);
-            }
+    // Check if we are on the dashboard page
+    if (isDashboardPage) {
+        if (!api.isAuthenticated()) {
+            window.location.href = '/index.html';
+            return;
         }
-    } else {
-        if (isDashboardPage) {
-            window.location.href = '/';
+
+        const username = api.getUser();
+        if (username) {
+            const userNameElement = document.getElementById('user-name');
+            if (userNameElement) userNameElement.textContent = username;
         }
+        
+        // Load projects first
+        await loadProjects();
+
+        // Handle initial URL state (if we want to support deep linking with hash or query params in the future)
+        // For now, simple loading is enough as we are moving to static file serving
     }
 });
 
@@ -170,6 +156,7 @@ async function loadProjects() {
     
     try {
         const projects = await api.projects.getAll();
+        console.log('Projects loaded:', projects);
         displayProjects(projects);
     } catch (error) {
         showToast('Error al cargar proyectos: ' + error.message, 'error');
@@ -179,6 +166,7 @@ async function loadProjects() {
 }
 
 function displayProjects(projects) {
+    console.log('Displaying projects:', projects);
     const grid = document.getElementById('projects-grid');
     if (!grid) return; // Guard clause
     
@@ -200,14 +188,25 @@ function displayProjects(projects) {
         return;
     }
     
-    grid.innerHTML = projects.map(project => `
+    grid.innerHTML = projects
+        .filter(project => {
+            if (!project.id) {
+                console.warn('Skipping project with invalid ID:', project);
+                return false;
+            }
+            return true;
+        })
+        .map(project => `
         <div class="project-card" onclick="openProject(${project.id})">
             <div class="project-card-header">
                 <div>
                     <h3>${escapeHtml(project.nombre)}</h3>
                 </div>
                 <div class="project-card-actions" onclick="event.stopPropagation()">
-                    <button class="icon-btn" onclick="deleteProject(${project.id})" title="Eliminar">
+                    <button class="icon-btn" onclick="showEditProjectModal(${project.id}, '${escapeHtml(project.nombre)}', '${escapeHtml(project.descripcion || '')}')" title="Editar">
+                        ✎
+                    </button>
+                    <button class="icon-btn" onclick="showDeleteConfirmation(${project.id})" title="Eliminar">
                         ×
                     </button>
                 </div>
@@ -226,13 +225,25 @@ function displayProjects(projects) {
 }
 
 function showCreateProjectModal(updateUrl = true) {
+    document.getElementById('project-modal-title').textContent = 'Nuevo Proyecto';
+    document.getElementById('project-submit-btn').textContent = 'Crear Proyecto';
     document.getElementById('project-modal').classList.add('active');
+    document.getElementById('project-id').value = '';
     document.getElementById('project-name').value = '';
     document.getElementById('project-description').value = '';
     
     if (updateUrl) {
         history.pushState({modal: 'createProject'}, '', '/dashboard/proyectos');
     }
+}
+
+function showEditProjectModal(id, nombre, descripcion) {
+    document.getElementById('project-modal-title').textContent = 'Editar Proyecto';
+    document.getElementById('project-submit-btn').textContent = 'Guardar Cambios';
+    document.getElementById('project-modal').classList.add('active');
+    document.getElementById('project-id').value = id;
+    document.getElementById('project-name').value = nombre;
+    document.getElementById('project-description').value = descripcion;
 }
 
 function closeProjectModal() {
@@ -244,41 +255,71 @@ function closeProjectModal() {
     }
 }
 
-async function handleCreateProject(event) {
+async function handleSaveProject(event) {
     event.preventDefault();
     
+    const id = document.getElementById('project-id').value;
     const nombre = document.getElementById('project-name').value;
     const descripcion = document.getElementById('project-description').value;
     
     showLoading();
     
     try {
-        await api.projects.create(nombre, descripcion);
-        showToast('Proyecto creado exitosamente', 'success');
+        if (id) {
+            // Update existing project
+            await api.projects.update(id, nombre, descripcion);
+            showToast('Proyecto actualizado exitosamente', 'success');
+        } else {
+            // Create new project
+            await api.projects.create(nombre, descripcion);
+            showToast('Proyecto creado exitosamente', 'success');
+        }
         closeProjectModal();
         await loadProjects();
     } catch (error) {
-        showToast('Error al crear proyecto: ' + error.message, 'error');
+        showToast('Error al guardar proyecto: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
 }
 
-async function deleteProject(id) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer.')) {
+// Delete confirmation modal
+let projectToDelete = null;
+
+function showDeleteConfirmation(id) {
+    projectToDelete = id;
+    document.getElementById('delete-modal').classList.add('active');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.remove('active');
+    projectToDelete = null;
+}
+
+async function confirmDelete() {
+    console.log('Attempting to delete project. ID:', projectToDelete, 'Type:', typeof projectToDelete);
+
+    if (projectToDelete === null || projectToDelete === undefined || projectToDelete === 'null' || projectToDelete === 'undefined') {
+        console.error('Invalid project ID for deletion:', projectToDelete);
+        showToast('Error: ID de proyecto inválido', 'error');
+        closeDeleteModal();
         return;
     }
     
     showLoading();
+    closeDeleteModal();
     
     try {
-        await api.projects.delete(id);
+        console.log('Sending delete request for ID:', projectToDelete);
+        await api.projects.delete(projectToDelete);
         showToast('Proyecto eliminado correctamente', 'success');
         await loadProjects();
     } catch (error) {
+        console.error('Delete failed:', error);
         showToast('Error al eliminar proyecto: ' + error.message, 'error');
     } finally {
         hideLoading();
+        projectToDelete = null;
     }
 }
 
@@ -463,11 +504,15 @@ function getStatusClass(status) {
 window.onclick = function(event) {
     const projectModal = document.getElementById('project-modal');
     const taskModal = document.getElementById('task-modal');
+    const deleteModal = document.getElementById('delete-modal');
     
     if (projectModal && event.target === projectModal) {
         closeProjectModal();
     }
     if (taskModal && event.target === taskModal) {
         closeTaskModal();
+    }
+    if (deleteModal && event.target === deleteModal) {
+        closeDeleteModal();
     }
 }

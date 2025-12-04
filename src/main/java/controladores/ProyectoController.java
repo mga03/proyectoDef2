@@ -52,6 +52,10 @@ public class ProyectoController {
             return dto;
         }).collect(Collectors.toList());
         
+        System.out.println("Returning projects: " + dtos.stream()
+            .map(d -> "ID: " + d.getId() + ", Name: " + d.getNombre())
+            .collect(Collectors.joining("; ")));
+            
         return ResponseEntity.ok(dtos);
     }
 

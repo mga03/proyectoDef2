@@ -75,16 +75,17 @@
       </main>
     </div>
 
-    <!-- Create Project Modal -->
+    <!-- Create/Edit Project Modal -->
     <div id="project-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Nuevo Proyecto</h3>
+          <h3 id="project-modal-title">Nuevo Proyecto</h3>
           <button class="modal-close" onclick="closeProjectModal()">
             &times;
           </button>
         </div>
-        <form onsubmit="handleCreateProject(event)">
+        <form onsubmit="handleSaveProject(event)">
+          <input type="hidden" id="project-id" value="" />
           <div class="form-group">
             <label for="project-name">Nombre del Proyecto</label>
             <input
@@ -110,7 +111,7 @@
             >
               Cancelar
             </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="project-submit-btn">
               Crear Proyecto
             </button>
           </div>
@@ -163,6 +164,30 @@
       </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Confirmar Eliminación</h3>
+          <button class="modal-close" onclick="closeDeleteModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar este proyecto?</p>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay" style="display: none">
       <div class="spinner"></div>
@@ -172,6 +197,6 @@
     <div id="toast" class="toast"></div>
 
     <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=1"></script>
   </body>
 </html>
