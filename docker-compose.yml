@@ -1,0 +1,43 @@
+services:
+  # 1. Base de Datos
+  mysql_db:
+    image: mysql:8.0
+    container_name: taskflow_db
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: GestorProyectos
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  # 2. Tu API (PruebaApi) - Compilada desde la carpeta de al lado
+  api_backend:
+    build:
+      context: ../PruebaApi   # <--- AQUÍ ESTÁ EL TRUCO
+      dockerfile: ../proyectoDef2/api.Dockerfile # Usamos el dockerfile que creamos en proyectoDef2
+    container_name: taskflow_api
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    environment:
+      # Sobrescribimos la conexión de la API sin tocar su código
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/GestorProyectos?allowPublicKeyRetrieval=true&useSSL=false
+
+  # 3. Tu Web (proyectoDef2)
+  web_frontend:
+    build: .
+    container_name: taskflow_web
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api_backend
+
+volumes:
+  mysql_data:

@@ -1,0 +1,33 @@
+# --- ETAPA 1: Construcción (Build) ---
+# Usamos una imagen oficial de Maven con Java 21 para compilar
+FROM maven:3.9-eclipse-temurin-21 AS build
+
+# Creamos la carpeta de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copiamos primero el archivo pom.xml y descargamos las dependencias
+# (Esto optimiza la velocidad de las construcciones futuras)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copiamos el código fuente de tu proyecto
+COPY src ./src
+
+# Compilamos el proyecto y creamos el archivo .jar (saltando los tests para ir más rápido)
+RUN mvn clean package -DskipTests
+
+# --- ETAPA 2: Ejecución (Run) ---
+# Usamos una imagen muy ligera de Java 21 solo para ejecutarlo
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+# Copiamos el .jar generado en la etapa anterior a esta nueva imagen
+# Basado en tu pom.xml: artifactId=gestorproyectos, version=0.0.1-SNAPSHOT
+COPY --from=build /app/target/gestorproyectos-0.0.1-SNAPSHOT.jar app.jar
+
+# Informamos a Docker que la app usa el puerto 8080
+EXPOSE 8080
+
+# Comando para arrancar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]

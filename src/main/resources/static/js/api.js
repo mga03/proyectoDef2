@@ -1,193 +1,104 @@
-// API Configuration
-const API_BASE_URL = "http://localhost:8080/api";
-
-// Storage keys
+// CONFIGURACIÓN: Apuntamos al puerto 8083 (Backend)
+const API_BASE_URL = "http://localhost:8083/api";
 const TOKEN_KEY = "taskflow_token";
 const USER_KEY = "taskflow_user";
 
-// API Helper Functions
 const api = {
-  // Get auth token from localStorage
-  getToken() {
-    return localStorage.getItem(TOKEN_KEY);
-  },
+  getToken() { return localStorage.getItem(TOKEN_KEY); },
+  saveToken(token) { localStorage.setItem(TOKEN_KEY, token); },
+  removeToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); },
+  saveUser(username) { localStorage.setItem(USER_KEY, username); },
+  getUser() { return localStorage.getItem(USER_KEY); },
+  isAuthenticated() { return !!this.getToken(); },
 
-  // Save auth token to localStorage
-  saveToken(token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  },
-
-  // Remove auth token
-  removeToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  },
-
-  // Save user info
-  saveUser(username) {
-    localStorage.setItem(USER_KEY, username);
-  },
-
-  // Get user info
-  getUser() {
-    return localStorage.getItem(USER_KEY);
-  },
-
-  // Check if user is authenticated
-  isAuthenticated() {
-    return !!this.getToken();
-  },
-
-  // Generic request function
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     const token = this.getToken();
-
     const config = {
-      headers: {
+      headers: { 
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
+        ...(token && { Authorization: `Bearer ${token}` }), // Enviamos token por si acaso
+        ...options.headers 
       },
       ...options,
     };
 
     try {
       const response = await fetch(url, config);
-
-      // Handle 401 Unauthorized
-      if (response.status === 401) {
-        this.removeToken();
-        window.location.reload();
-        throw new Error(
-          "Sesión expirada. Por favor, inicia sesión nuevamente."
-        );
-      }
-
-      // Handle other errors
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || `Error: ${response.status}`);
-      }
-
-      // Handle empty responses
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return await response.json();
-      }
-
-      return await response.text();
+      return contentType && contentType.includes("application/json") ? await response.json() : await response.text();
     } catch (error) {
       console.error("API Error:", error);
       throw error;
     }
   },
 
-  // Auth endpoints
+  // --- 1. SIMULACIÓN DE SEGURIDAD ---
+  // Como PruebaApi no tiene login, lo simulamos aquí para que la web te deje entrar.
   auth: {
     async register(username, email, password) {
-      return await api.request("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ username, email, password }),
-      });
+      return Promise.resolve({ message: "Registro simulado OK" });
     },
-
     async login(username, password) {
-      const response = await api.request("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (response.token) {
-        api.saveToken(response.token);
+      // Simulación: Si es admin/123456 te deja pasar
+      if (username === "admin" && password === "123456") {
+        const fakeToken = "token_falso_bypass";
+        api.saveToken(fakeToken);
         api.saveUser(username);
+        return Promise.resolve({ token: fakeToken });
       }
-
-      return response;
+      return Promise.reject(new Error("Usuario incorrecto (Mock)"));
     },
-
-    logout() {
-      api.removeToken();
-    },
+    logout() { api.removeToken(); },
   },
 
-  // Projects endpoints
+  // --- 2. PROYECTOS (Directo a la API) ---
   projects: {
-    async getAll() {
-      return await api.request("/proyectos", {
-        method: "GET",
-      });
-    },
-
-    async getById(id) {
-      return await api.request(`/proyectos/${id}`, {
-        method: "GET",
-      });
-    },
-
+    async getAll() { return await api.request("/proyectos"); },
+    async getById(id) { return await api.request(`/proyectos/${id}`); },
     async create(nombre, descripcion) {
+      // Enviamos valores por defecto que la API pueda necesitar
       return await api.request("/proyectos", {
         method: "POST",
-        body: JSON.stringify({ nombre, descripcion }),
+        body: JSON.stringify({ nombre, descripcion, estado: "ACTIVO", prioridad: 1 }),
       });
     },
-
     async update(id, nombre, descripcion) {
+      const current = await this.getById(id); // Recuperar para no borrar otros campos
       return await api.request(`/proyectos/${id}`, {
         method: "PUT",
-        body: JSON.stringify({ nombre, descripcion }),
+        body: JSON.stringify({ ...current, nombre, descripcion }),
       });
     },
-
-    async delete(id) {
-      return await api.request(`/proyectos/${id}`, {
-        method: "DELETE",
-      });
-    },
+    async delete(id) { return await api.request(`/proyectos/${id}`, { method: "DELETE" }); },
   },
 
-  // Tasks endpoints
+  // --- 3. TAREAS (Adaptado: Filtro Manual) ---
   tasks: {
     async getByProject(proyectoId) {
-      return await api.request(`/proyectos/${proyectoId}/tareas`, {
-        method: "GET",
-      });
+      // PROBLEMA: PruebaApi no tiene endpoint "/proyectos/{id}/tareas"
+      // SOLUCIÓN: Pedimos TODAS y filtramos aquí en el navegador
+      const allTasks = await api.request("/tareas");
+      return allTasks.filter(t => t.proyectoId == proyectoId);
     },
-
     async create(proyectoId, titulo, descripcion, fechaVencimiento) {
-      return await api.request(`/proyectos/${proyectoId}/tareas`, {
+      return await api.request("/tareas", {
         method: "POST",
         body: JSON.stringify({
-          titulo,
-          descripcion,
-          fechaVencimiento,
+          titulo, descripcion, fechaVencimiento,
+          proyectoId: parseInt(proyectoId), // Vinculamos manualmente
+          estado: "PENDIENTE", prioridad: 1
         }),
       });
     },
-
-    async update(
-      proyectoId,
-      tareaId,
-      titulo,
-      descripcion,
-      fechaVencimiento,
-      estado
-    ) {
-      return await api.request(`/proyectos/${proyectoId}/tareas/${tareaId}`, {
+    async update(proyectoId, tareaId, titulo, descripcion, fechaVencimiento, estado) {
+      const current = await api.request(`/tareas/${tareaId}`);
+      return await api.request(`/tareas/${tareaId}`, {
         method: "PUT",
-        body: JSON.stringify({
-          titulo,
-          descripcion,
-          fechaVencimiento,
-          estado,
-        }),
+        body: JSON.stringify({ ...current, titulo, descripcion, fechaVencimiento, estado }),
       });
     },
-
-    async delete(proyectoId, tareaId) {
-      return await api.request(`/proyectos/${proyectoId}/tareas/${tareaId}`, {
-        method: "DELETE",
-      });
-    },
+    async delete(proyectoId, tareaId) { return await api.request(`/tareas/${tareaId}`, { method: "DELETE" }); },
   },
 };
