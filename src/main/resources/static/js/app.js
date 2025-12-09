@@ -297,21 +297,22 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
-    console.log('Attempting to delete project. ID:', projectToDelete, 'Type:', typeof projectToDelete);
+    const idToDelete = projectToDelete;
+    console.log('Attempting to delete project. ID:', idToDelete, 'Type:', typeof idToDelete);
 
-    if (projectToDelete === null || projectToDelete === undefined || projectToDelete === 'null' || projectToDelete === 'undefined') {
-        console.error('Invalid project ID for deletion:', projectToDelete);
+    if (idToDelete === null || idToDelete === undefined || idToDelete === 'null' || idToDelete === 'undefined') {
+        console.error('Invalid project ID for deletion:', idToDelete);
         showToast('Error: ID de proyecto inválido', 'error');
         closeDeleteModal();
         return;
     }
     
     showLoading();
-    closeDeleteModal();
+    closeDeleteModal(); // This clears projectToDelete, but we have idToDelete
     
     try {
-        console.log('Sending delete request for ID:', projectToDelete);
-        await api.projects.delete(projectToDelete);
+        console.log('Sending delete request for ID:', idToDelete);
+        await api.projects.delete(idToDelete);
         showToast('Proyecto eliminado correctamente', 'success');
         await loadProjects();
     } catch (error) {
@@ -319,7 +320,6 @@ async function confirmDelete() {
         showToast('Error al eliminar proyecto: ' + error.message, 'error');
     } finally {
         hideLoading();
-        projectToDelete = null;
     }
 }
 

@@ -3,11 +3,13 @@ package servicios;
 import modelo.Proyecto;
 import repositorio.ProyectoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional
 public class ProyectoService {
     
     private final ProyectoRepository proyectoRepository;
