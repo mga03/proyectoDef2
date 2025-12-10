@@ -1,4 +1,4 @@
-package configuracion;
+package com.taskflow.gestorproyectos.configuracion;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -60,12 +60,12 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    // Extrae la fecha de expiración
+    // Extrae la fecha de expiraciÃ³n
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
     
-    // Método genérico para extraer Claims
+    // MÃ©todo genÃ©rico para extraer Claims
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);

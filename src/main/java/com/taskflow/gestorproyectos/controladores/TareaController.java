@@ -1,9 +1,9 @@
-package controladores;
+package com.taskflow.gestorproyectos.controladores;
 
 
-import dto.TareaDTO;
-import modelo.Tarea;
-import servicios.TareaService;
+import com.taskflow.gestorproyectos.dto.TareaDTO;
+import com.taskflow.gestorproyectos.modelo.Tarea;
+import com.taskflow.gestorproyectos.servicios.TareaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class TareaController {
         this.tareaService = tareaService;
     }
 
-    // POST: Crear una nueva tarea en un proyecto específico
+    // POST: Crear una nueva tarea en un proyecto especÃ­fico
     @PostMapping
     public ResponseEntity<TareaDTO> crearTarea(@PathVariable Long proyectoId, @RequestBody TareaDTO tareaDTO) {
         // Convertir DTO a Entidad
@@ -59,5 +59,5 @@ public class TareaController {
         return ResponseEntity.ok(dtos);
     }
     
-    // ... Faltan los métodos PUT y DELETE para completar el CRUD de Tareas
+    // ... Faltan los mÃ©todos PUT y DELETE para completar el CRUD de Tareas
 }

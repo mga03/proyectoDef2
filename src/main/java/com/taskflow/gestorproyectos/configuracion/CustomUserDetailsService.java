@@ -1,4 +1,4 @@
-package configuracion;
+package com.taskflow.gestorproyectos.configuracion;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +14,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Simular que el usuario "admin" siempre existe en el sistema
         if ("admin".equals(username)) {
-            // Devolvemos un usuario válido con contraseña vacía (ya la validamos en el Controller)
+            // Devolvemos un usuario vÃ¡lido con contraseÃ±a vacÃ­a (ya la validamos en el Controller)
             return new User("admin", "", new ArrayList<>());
         } else {
             throw new UsernameNotFoundException("Usuario no encontrado: " + username);

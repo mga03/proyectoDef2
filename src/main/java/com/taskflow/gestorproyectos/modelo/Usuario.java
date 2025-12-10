@@ -1,4 +1,4 @@
-package modelo;
+package com.taskflow.gestorproyectos.modelo;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,5 +16,5 @@ public class Usuario {
     private String username;
     
     @Column(nullable = false)
-    private String password; // La contraseña se almacenará cifrada
+    private String password; // La contraseÃ±a se almacenarÃ¡ cifrada
 }

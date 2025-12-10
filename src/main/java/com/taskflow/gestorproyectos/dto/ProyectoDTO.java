@@ -1,4 +1,4 @@
-package dto;
+package com.taskflow.gestorproyectos.dto;
 
 import java.time.LocalDate;
 
@@ -45,3 +45,4 @@ public class ProyectoDTO {
         this.fechaCreacion = fechaCreacion;
     }
 }
+

@@ -1,4 +1,4 @@
-package dto;
+package com.taskflow.gestorproyectos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

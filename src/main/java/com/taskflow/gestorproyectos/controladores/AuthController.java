@@ -1,9 +1,9 @@
-package controladores;
+package com.taskflow.gestorproyectos.controladores;
 
-import configuracion.CustomUserDetailsService;
-import configuracion.JwtUtil;
-import dto.AuthResponse;
-import dto.LoginRequest;
+import com.taskflow.gestorproyectos.configuracion.CustomUserDetailsService;
+import com.taskflow.gestorproyectos.configuracion.JwtUtil;
+import com.taskflow.gestorproyectos.dto.AuthResponse;
+import com.taskflow.gestorproyectos.dto.LoginRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +22,12 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
     }
 
-    // ELIMINADO EL MÉTODO DE REGISTRO (@PostMapping("/register"))
+    // ELIMINADO EL MÃ‰TODO DE REGISTRO (@PostMapping("/register"))
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {
         
-        // 1. Comprobación manual HARDCODED (Usuario: admin, Contraseña: 123456)
+        // 1. ComprobaciÃ³n manual HARDCODED (Usuario: admin, ContraseÃ±a: 123456)
         if ("admin".equals(authenticationRequest.getUsername()) && 
             "123456".equals(authenticationRequest.getPassword())) {
             
@@ -38,7 +38,7 @@ public class AuthController {
             final String jwt = jwtUtil.generateToken(userDetails);
             return ResponseEntity.ok(new AuthResponse(jwt));
         } else {
-            return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
+            return ResponseEntity.status(401).body("Usuario o contraseÃ±a incorrectos");
         }
     }
 }

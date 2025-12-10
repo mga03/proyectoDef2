@@ -1,9 +1,9 @@
-package servicios;
+package com.taskflow.gestorproyectos.servicios;
 
-import modelo.Proyecto;
-import modelo.Tarea;
-import repositorio.ProyectoRepository;
-import repositorio.TareaRepository;
+import com.taskflow.gestorproyectos.modelo.Proyecto;
+import com.taskflow.gestorproyectos.modelo.Tarea;
+import com.taskflow.gestorproyectos.repositorio.ProyectoRepository;
+import com.taskflow.gestorproyectos.repositorio.TareaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,5 +32,5 @@ public class TareaService {
         return tareaRepository.findByProyectoId(proyectoId);
     }
     
-    // ... otros métodos CRUD (obtenerPorId, actualizar, eliminar)
+    // ... otros mÃ©todos CRUD (obtenerPorId, actualizar, eliminar)
 }

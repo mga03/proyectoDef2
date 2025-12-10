@@ -1,4 +1,4 @@
-package modelo;
+package com.taskflow.gestorproyectos.modelo;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,7 +28,7 @@ public class Tarea {
     @Enumerated(EnumType.STRING)
     private EstadoTarea estado = EstadoTarea.PENDIENTE;
 
-    // Relación Many-to-One: Muchas Tareas pertenecen a un Proyecto
+    // RelaciÃ³n Many-to-One: Muchas Tareas pertenecen a un Proyecto
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proyecto_id", nullable = false)
     private Proyecto proyecto;

@@ -1,11 +1,11 @@
-package repositorio;
+package com.taskflow.gestorproyectos.repositorio;
 
-import modelo.Tarea;
+import com.taskflow.gestorproyectos.modelo.Tarea;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TareaRepository extends JpaRepository<Tarea, Long> {
     
-    // Método para buscar todas las tareas de un proyecto específico
+    // MÃ©todo para buscar todas las tareas de un proyecto especÃ­fico
     List<Tarea> findByProyectoId(Long proyectoId);
 }

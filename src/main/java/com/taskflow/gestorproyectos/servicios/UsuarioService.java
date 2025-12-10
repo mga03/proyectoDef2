@@ -1,8 +1,8 @@
-package servicios;
+package com.taskflow.gestorproyectos.servicios;
 
 
-import modelo.Usuario;
-import repositorio.UsuarioRepository;
+import com.taskflow.gestorproyectos.modelo.Usuario;
+import com.taskflow.gestorproyectos.repositorio.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class UsuarioService {
     }
 
     public Usuario registrarNuevoUsuario(Usuario usuario) {
-        // Cifrar la contraseña antes de guardarla en la base de datos
+        // Cifrar la contraseÃ±a antes de guardarla en la base de datos
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }

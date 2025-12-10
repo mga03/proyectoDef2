@@ -1,8 +1,8 @@
-package controladores;
+package com.taskflow.gestorproyectos.controladores;
 
-import dto.ProyectoDTO;
-import modelo.Proyecto;
-import servicios.ProyectoService;
+import com.taskflow.gestorproyectos.dto.ProyectoDTO;
+import com.taskflow.gestorproyectos.modelo.Proyecto;
+import com.taskflow.gestorproyectos.servicios.ProyectoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -98,3 +98,4 @@ public class ProyectoController {
         return ResponseEntity.noContent().build();
     }
 }
+

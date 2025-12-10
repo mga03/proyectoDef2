@@ -1,7 +1,7 @@
-package servicios;
+package com.taskflow.gestorproyectos.servicios;
 
-import modelo.Proyecto;
-import repositorio.ProyectoRepository;
+import com.taskflow.gestorproyectos.modelo.Proyecto;
+import com.taskflow.gestorproyectos.repositorio.ProyectoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,3 +43,4 @@ public class ProyectoService {
         proyectoRepository.delete(proyecto);
     }
 }
+
