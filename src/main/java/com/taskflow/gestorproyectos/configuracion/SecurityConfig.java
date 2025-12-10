@@ -14,22 +14,18 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Comenta el constructor para no tener que inyectar el filtro JWT por ahora
-    // public SecurityConfig(JwtRequestFilter jwtRequestFilter) { ... }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
-            // DESACTIVACIÓN COMPLETA DE LOGIN
+            // ELIMINAMOS TODOS LOS FORMULARIOS DE LOGIN POR DEFECTO
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             
             .authorizeHttpRequests(auth -> auth
-                // ABRIMOS LAS PUERTAS TOTALMENTE
-                .anyRequest().permitAll()
+                .anyRequest().permitAll() // ABRIMOS LA PUERTA PARA VER TU WEB
             );
 
         return http.build();
@@ -38,7 +34,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("*")); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
